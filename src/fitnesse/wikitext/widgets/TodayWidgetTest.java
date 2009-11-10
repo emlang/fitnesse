@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.junit.After;
@@ -13,14 +14,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TodayWidgetTest {
+  private Locale defaultLocale;
+  
   @Before
   public void setup() {
+    defaultLocale = Locale.getDefault();
     TodayWidget.todayForTest = new GregorianCalendar(1952, Calendar.DECEMBER, 5, 1, 13, 23);  //GDTH unix date!!!  Eleven == Dec
+    // Most tests assume US locale
+    Locale.setDefault(Locale.US);
   }
 
   @After
   public void teardown() {
     TodayWidget.todayForTest = null;
+    Locale.setDefault(defaultLocale);
   }
 
   private boolean matches(String widget) {
@@ -41,6 +48,8 @@ public class TodayWidgetTest {
     assertTrue(matches("!today -3"));
     assertTrue(matches("!today (MMM)"));
     assertTrue(matches("!today (MMM) +3"));
+    assertTrue(matches("!today -lang=en"));
+    assertTrue(matches("!today -lang=de (dd.MM.yyyy)"));
   }
 
   @Test
@@ -48,6 +57,7 @@ public class TodayWidgetTest {
     assertFalse(matches("!today -p"));
     assertFalse(matches("!today 33"));
     assertFalse(matches("!today x"));
+    assertFalse(matches("!today -lang=xxx"));
   }
 
   @Test
@@ -93,6 +103,12 @@ public class TodayWidgetTest {
   @Test
   public void formatPlusOneDay() throws Exception {
     assertRenders("!today (ddMMM) +1", "06Dec");
+  }
+  
+  @Test
+  public void formatLocale() throws Exception {
+    Locale.setDefault(Locale.GERMAN);
+    assertRenders("!today -lang=de (MMM)", "Dez");
   }
 
 }

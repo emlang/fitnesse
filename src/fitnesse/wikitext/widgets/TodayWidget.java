@@ -4,17 +4,19 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TodayWidget extends ParentWidget {
-  public static final String REGEXP = "!today(?: +(?:-t|-xml|\\(.*\\)))?( +((\\-|\\+)\\d+))?";
-  public static final Pattern PATTERN = Pattern.compile("!today( +(?:(-t)|(-xml)|\\((.*)\\)))?( +((\\-|\\+)\\d+))?");
-
+  public static final String REGEXP = "!today(?: +(?:-t|-xml|-lang=\\w\\w|\\(.*\\)))*( +((\\-|\\+)\\d+))?";
+  public static final Pattern PATTERN = Pattern.compile("!today( +(?:(-t)|(-xml)|((-lang=)(\\w\\w))|\\((.*)\\)))*( +((\\-|\\+)\\d+))?");
   private boolean withTime = false;
   private boolean xml = false;
   private SimpleDateFormat explicitDateFormat = null;
   private int dayDiff;
+  private boolean lang;
+  private String langCode;
   private SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM, yyyy");
   private SimpleDateFormat dateFormatWithTime = new SimpleDateFormat("dd MMM, yyyy HH:mm");
   private SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -29,12 +31,18 @@ public class TodayWidget extends ParentWidget {
     } else {
       withTime = (match.group(2) != null);
       xml = (match.group(3) != null);
-      String formatString = match.group(4);
-      if (formatString != null) {
-        explicitDateFormat = new SimpleDateFormat(formatString);
+      lang = (match.group(4) != null);
+      if (lang) {
+        langCode = match.group(6);
       }
 
-      String s = match.group(6);
+      String formatString = match.group(7);
+
+      if (formatString != null) {
+        explicitDateFormat = new SimpleDateFormat(formatString, getLocale());
+      }
+
+      String s = match.group(9);
       if (s != null) {
         if (s.startsWith("+")) {
           s = s.substring(1);
@@ -42,6 +50,10 @@ public class TodayWidget extends ParentWidget {
         dayDiff = Integer.parseInt(s);
       }
     }
+  }
+  
+  private Locale getLocale() {
+    return lang ? new Locale(langCode) : Locale.getDefault();
   }
 
   public String render() throws Exception {
@@ -65,4 +77,3 @@ public class TodayWidget extends ParentWidget {
     return result;
   }
 }
-
