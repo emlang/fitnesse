@@ -1,4 +1,4 @@
-To diplay todays date:
+To display today's date:
 
 |!c '''Markup Text'''|!c '''Displayed as'''|
 |!style_code(!-Today is !today.-!)|Today is !today.|
@@ -7,6 +7,8 @@ To diplay todays date:
 |!style_code[!-Tomorrow is !today +1.-!]|Tomorrow is !today +1.|
 |!style_code[!-Last week was !today -7.-!]|Last week was !today -7.|
 |!style_code[!-The month is !today (MMM).-!]|The month is !today (MMM).|
+|!style_code[!-The German month is !today -lang=de (MMMM).-!]|The German month is !today -lang=de (MMMM).|
+|!style_code[!-The Spanish day of week is !today -lang=es (EEEE).-!]|The Spanish day of week is !today -lang=es (EEEE).|
 
-As you can see, you can add or subtract days.  You can include the time tiwh -t.  And you can use your own format for the time.  (See !style_code(!-SimpleDataFormat-!) for the syntax.)
+As you can see, you can add or subtract days.  You can include the time with -t.  And you can use your own format for the time.  (See !style_code(!-SimpleDateFormat-!) for the syntax.)
 

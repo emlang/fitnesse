@@ -1,5 +1,6 @@
 package fitnesse.wikitext.widgets;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -9,16 +10,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TodayWidget extends ParentWidget {
-  public static final String REGEXP = "!today(?: +(?:-t|-xml|-lang=\\w\\w|\\(.*\\)))*( +((\\-|\\+)\\d+))?";
-  public static final Pattern PATTERN = Pattern.compile("!today( +(?:(-t)|(-xml)|((-lang=)(\\w\\w))|\\((.*)\\)))*( +((\\-|\\+)\\d+))?");
+  public static final String REGEXP = "!today(?: +(?:-t|-xml|-lang=\\w\\w|\\(.*\\)))*( +(([+-]\\d+)([dhm])?))?";
+  public static final Pattern PATTERN = Pattern.compile("!today( +(?:(-t)|(-xml)|((-lang=)(\\w\\w))|\\((.*)\\)))*( +(([+-]\\d+)([dhm])?))?");
   private boolean withTime = false;
   private boolean xml = false;
   private SimpleDateFormat explicitDateFormat = null;
-  private int dayDiff;
+  private int timeDiff;
+  private int timeField;
   private boolean lang;
   private String langCode;
-  private SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM, yyyy");
-  private SimpleDateFormat dateFormatWithTime = new SimpleDateFormat("dd MMM, yyyy HH:mm");
   private SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
   public static Calendar todayForTest = null;
@@ -42,12 +42,22 @@ public class TodayWidget extends ParentWidget {
         explicitDateFormat = new SimpleDateFormat(formatString, getLocale());
       }
 
-      String s = match.group(9);
-      if (s != null) {
-        if (s.startsWith("+")) {
-          s = s.substring(1);
+      if (match.group(9) != null) {
+        String s = match.group(10);
+        if (s != null) {
+          if (s.startsWith("+")) {
+            s = s.substring(1);
+          }
+          timeDiff = Integer.parseInt(s);
+          String s1 = match.group(11);
+          if (s1 == null || "d".equals(s1)) {
+            timeField = Calendar.DAY_OF_MONTH;
+          } else if ("h".equals(s1)) {
+            timeField = Calendar.HOUR_OF_DAY;
+          } else if ("m".equals(s1)) {
+            timeField = Calendar.MINUTE;
+          }
         }
-        dayDiff = Integer.parseInt(s);
       }
     }
   }
@@ -58,20 +68,20 @@ public class TodayWidget extends ParentWidget {
 
   public String render() throws Exception {
     Calendar cal = todayForTest != null ? todayForTest : GregorianCalendar.getInstance();
-    cal.add(Calendar.DAY_OF_MONTH, dayDiff);
+    cal.add(timeField, timeDiff);
 
     Date date = cal.getTime();
 
     String result;
     if (withTime) {
-      result = dateFormatWithTime.format(date);
+      result = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, getLocale()).format(date);
     } else if (xml) {
       result = xmlDateFormat.format(date);
     } else {
       if (explicitDateFormat != null) {
         result = explicitDateFormat.format(date);
       } else {
-        result = dateFormat.format(date);
+        result = DateFormat.getDateInstance(DateFormat.MEDIUM, getLocale()).format(date);
       }
     }
     return result;
