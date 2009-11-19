@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.junit.After;
@@ -137,6 +138,14 @@ public class TodayWidgetTest {
   @Test
   public void formatSpecificLocale() throws Exception {
     assertRenders("!today -lang=de (MMM)", "Dez");
+  }
+  
+  @Test
+  public void testLocaleOverride() throws Exception {
+    Locale currentLocale = Locale.getDefault();
+    Locale.setDefault(Locale.CHINESE);
+    assertRenders("!today -lang=en (ddMMM) +1", "06Dec");
+    Locale.setDefault(currentLocale);
   }
 
 }
