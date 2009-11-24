@@ -1,14 +1,21 @@
 To display today's date:
 
+This widget is locale-aware, i.e. all dates will be formatted according to the locale in use by the VM unless you specifically provide a locale to use.
+
+The !style_code(!-!today-!) and !style_code(!-!today -t-!) variants will use a medium verbose date format according to the default or explicitly specified locale.
+
+Earlier versions of this widget used a fixed date format that was not locale-aware - you can force the widget to revert to this behaviour by starting fitnesse with the system property !style_code(fitnesse.widgets.today.legacymode=true).
+
 |!c '''Markup Text'''|!c '''Displayed as'''|
-|!style_code(!-Today is !today.-!)|Today is !today.|
+|!style_code(!-Today is !today.-!)|Today is !today. (Date format should match your locale.)|
 |!style_code(!-XML is !today -xml.-!)|XML is !today -xml.|
-|!style_code[!-Right now it is !today -t.-!]|Right now it is !today -t.|
-|!style_code[!-Tomorrow is !today +1.-!]|Tomorrow is !today +1.|
-|!style_code[!-Last week was !today -7.-!]|Last week was !today -7.|
+|!style_code[!-Right now it is !today -t.-!]|Right now it is !today -t. (Date format should match your locale.)|
+|!style_code[!-Tomorrow is !today +1d.-!]|Tomorrow is !today +1d.|
+|!style_code[!-Last week was !today -7d.-!]|Last week was !today -7d.|
+|!style_code[!-Fifteen minutes ago was !today -t -15m.-!]|Fifteen minutes ago was !today -t -15m.|
 |!style_code[!-The month is !today (MMM).-!]|The month is !today (MMM).|
 |!style_code[!-The German month is !today -lang=de (MMMM).-!]|The German month is !today -lang=de (MMMM).|
 |!style_code[!-The Spanish day of week is !today -lang=es (EEEE).-!]|The Spanish day of week is !today -lang=es (EEEE).|
 
-As you can see, you can add or subtract days.  You can include the time with -t.  And you can use your own format for the time.  (See !style_code(!-SimpleDateFormat-!) for the syntax.)
+As you can see, you can add or subtract from the current time, supported units are ''d/h/m'' for days/hours/minutes respectively. If you don't supply a unit, days will be assumed to ensure backwards compatibility.  You can include the time with -t.  And you can use your own format for the time.  (See Java's !style_code(!-SimpleDateFormat-!) for the syntax.)
 

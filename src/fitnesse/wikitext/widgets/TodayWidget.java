@@ -20,11 +20,17 @@ public class TodayWidget extends ParentWidget {
   private boolean lang;
   private String langCode;
   private SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+  // NB: Legacy case breaks for non-english locales (as it did in previous versions)
+  private SimpleDateFormat legacyDateFormat = new SimpleDateFormat("dd MMM, yyyy");
+  private SimpleDateFormat legacyDateFormatWithTime = new SimpleDateFormat("dd MMM, yyyy HH:mm");
+  private boolean legacyMode = false;
 
   public static Calendar todayForTest = null;
 
   public TodayWidget(ParentWidget parent, String text) throws Exception {
     super(parent);
+    String legacyPropertyValue = System.getProperty("fitnesse.widgets.today.legacymode", "false");
+    legacyMode = "true".equals(legacyPropertyValue);
     Matcher match = PATTERN.matcher(text);
     if (!match.find()) {
       System.err.println("TodayWidget: match was not found, text = '" + text + "'");
@@ -65,8 +71,16 @@ public class TodayWidget extends ParentWidget {
   private Locale getLocale() {
     return lang ? new Locale(langCode) : Locale.getDefault();
   }
-
+  
   public String render() throws Exception {
+    if (legacyMode) {
+      return renderLegacy();
+    } else {
+      return renderNew();
+    }
+  }
+
+  private String renderNew() throws Exception {
     Calendar cal = todayForTest != null ? todayForTest : GregorianCalendar.getInstance();
     cal.add(timeField, timeDiff);
 
@@ -82,6 +96,27 @@ public class TodayWidget extends ParentWidget {
         result = explicitDateFormat.format(date);
       } else {
         result = DateFormat.getDateInstance(DateFormat.MEDIUM, getLocale()).format(date);
+      }
+    }
+    return result;
+  }
+
+  private String renderLegacy() throws Exception {
+    Calendar cal = todayForTest != null ? todayForTest : GregorianCalendar.getInstance();
+    cal.add(timeField, timeDiff);
+
+    Date date = cal.getTime();
+
+    String result;
+    if (withTime) {
+      result = legacyDateFormatWithTime.format(date);
+    } else if (xml) {
+      result = xmlDateFormat.format(date);
+    } else {
+      if (explicitDateFormat != null) {
+        result = explicitDateFormat.format(date);
+      } else {
+        result = legacyDateFormat.format(date);
       }
     }
     return result;

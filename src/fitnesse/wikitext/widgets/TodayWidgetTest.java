@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.junit.After;
@@ -20,6 +21,7 @@ public class TodayWidgetTest {
   
   @Before
   public void setup() {
+    // We'll need this for the case where we can't perform a literal comparison on date strings.
     comparisonDate = new GregorianCalendar(1952, Calendar.DECEMBER, 5, 1, 13, 23); // make this a new object to be safe
     TodayWidget.todayForTest = new GregorianCalendar(1952, Calendar.DECEMBER, 5, 1, 13, 23);  //GDTH unix date!!!  Eleven == Dec
   }
@@ -67,12 +69,14 @@ public class TodayWidgetTest {
 
   @Test
   public void today() throws Exception {
+    // This checks the locale-dependent default behaviour and can therefore not check against a fixed string.
     comparisonFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
     assertRenders("!today", comparisonFormat.format(comparisonDate.getTime()));
   }
 
   @Test
   public void withTime() throws Exception {
+    // This checks the locale-dependent default behaviour and can therefore not check against a fixed string.
     comparisonFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
     assertRenders("!today -t", comparisonFormat.format(comparisonDate.getTime()));
   }
@@ -99,6 +103,7 @@ public class TodayWidgetTest {
 
   @Test
   public void subtractOneDay() throws Exception {
+    // This checks the locale-dependent default behaviour and can therefore not check against a fixed string.
     comparisonDate.add(Calendar.DAY_OF_MONTH, -1);
     comparisonFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
     assertRenders("!today -1", comparisonFormat.format(comparisonDate.getTime()));
@@ -106,6 +111,7 @@ public class TodayWidgetTest {
   
   @Test
   public void addTwoDaysWithLetter() throws Exception {
+    // This checks the locale-dependent default behaviour and can therefore not check against a fixed string.
     comparisonDate.add(Calendar.DAY_OF_MONTH, 2);
     comparisonFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
     assertRenders("!today +2d", comparisonFormat.format(comparisonDate.getTime()));
@@ -113,6 +119,7 @@ public class TodayWidgetTest {
 
   @Test
   public void subtractOneWeek() throws Exception {
+    // This checks the locale-dependent default behaviour and can therefore not check against a fixed string.
     comparisonDate.add(Calendar.DAY_OF_MONTH, -7);
     comparisonFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
     assertRenders("!today -7", comparisonFormat.format(comparisonDate.getTime()));
@@ -120,6 +127,7 @@ public class TodayWidgetTest {
 
   @Test
   public void addOneYear() throws Exception {
+    // This checks the locale-dependent default behaviour and can therefore not check against a fixed string.
     comparisonDate.add(Calendar.DAY_OF_MONTH, 365);
     comparisonFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
     assertRenders("!today +365", comparisonFormat.format(comparisonDate.getTime()));
@@ -147,5 +155,22 @@ public class TodayWidgetTest {
     assertRenders("!today -lang=en (ddMMM) +1", "06Dec");
     Locale.setDefault(currentLocale);
   }
-
+  
+  @Test public void testLegacyMode() throws Exception {
+    Properties originalProps = System.getProperties();
+    Properties p = new Properties(originalProps);
+    p.setProperty("fitnesse.widgets.today.legacymode", "true");
+    System.setProperties(p);
+    assertRenders("!today", "05 Dec, 1952");
+    System.setProperties(originalProps);
+  }
+  
+  @Test public void testLegacyModeWithTime() throws Exception {
+    Properties originalProps = System.getProperties();
+    Properties p = new Properties(originalProps);
+    p.setProperty("fitnesse.widgets.today.legacymode", "true");
+    System.setProperties(p);
+    assertRenders("!today -t", "05 Dec, 1952 01:13");
+    System.setProperties(originalProps);    
+  }
 }
